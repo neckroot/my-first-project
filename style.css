@@ -1,0 +1,8 @@
+.body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.task-done{
+    text-decoration: line-through;
+}
