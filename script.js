@@ -1,17 +1,18 @@
 let input = document.querySelector(".add-task__input");
-//Добавление таски
+
 document.querySelector(".add-task__button").addEventListener('click', addTask);
 document.addEventListener("click", removeTask);
 document.addEventListener('click', noticeTaskDone);
-document.addEventListener('pointerdown', takeTask);
-document.addEventListener('pointermove', shiftTask);
-document.addEventListener('pointerup', putTask);
+document.addEventListener('pointerdown', moveTask);
+// document.addEventListener('pointermove', shiftTask);
+// document.addEventListener('pointerup', putTask);
 
 function createTask() {
     document.querySelector(".task-list")
         .insertAdjacentHTML(
             "beforeend"
             , `<div class="task-block">
+                <div class="task-block__mover">move</div>
                 <div class="task-block__task">
                     ${input.value}
                 </div>
@@ -43,14 +44,27 @@ function noticeTaskDone(event) {
     event.target.classList.toggle('task-done');
 }
 
+function moveTask(event){
+    
+}
 function takeTask(event) {
-
+    if (!event.target.classList.contains('task-block__mover')) return;
+    
+    event.target.closest('.task-block')
+        .classList.add("task-block_move-state");
 }
 
 function shiftTask(event) {
+    if (!document.querySelector(".task-block_move-state")) return;
 
+   // document.querySelector(".task-block_move-state")
+    
+    event.preventDefault();
 }
 
-function putTask(event){
-
+function putTask(){
+    if (!document.querySelector(".task-block_move-state")) return;
+    
+    document.querySelector(".task-block_move-state")
+        .classList.remove("task-block_move-state");
 }

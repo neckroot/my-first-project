@@ -2,6 +2,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+}
+.task-block{
+    display: flex;
+    justify-content: space-between;
+}
+.task-block_move-state{
+    position: absolute;
 }
 .task-done{
     text-decoration: line-through;
