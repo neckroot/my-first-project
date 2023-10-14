@@ -4,12 +4,25 @@
     align-items: center;
     justify-content: center;
 }
+.task-list{
+}
 .task-block{
     display: flex;
+    height: 30px;
     justify-content: space-between;
+    align-items: center;
+}
+.task-block__mover{
+    cursor: pointer;
+}
+.task-list__pointer-separator{
+    width: 80%;
+    margin: 0 auto;
+    border: 2px solid coral;
 }
 .task-block_move-state{
     position: absolute;
+    z-index: 1;
 }
 .task-done{
     text-decoration: line-through;

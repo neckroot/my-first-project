@@ -1,11 +1,14 @@
 let input = document.querySelector(".add-task__input");
-
+//переписать взаимодействие с формой
 document.querySelector(".add-task__button").addEventListener('click', addTask);
+document.addEventListener('keydown', function (event) {
+    if (document.activeElement === input && event.code === 'Enter') {
+        addTask();
+    } else return;
+});
 document.addEventListener("click", removeTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
-// document.addEventListener('pointermove', shiftTask);
-// document.addEventListener('pointerup', putTask);
 
 function createTask() {
     document.querySelector(".task-list")
@@ -44,27 +47,62 @@ function noticeTaskDone(event) {
     event.target.classList.toggle('task-done');
 }
 
-function moveTask(event){
-    
-}
-function takeTask(event) {
+function moveTask(event) {
     if (!event.target.classList.contains('task-block__mover')) return;
+    if (document.querySelectorAll(".task-block").length < 2) return;
     
-    event.target.closest('.task-block')
-        .classList.add("task-block_move-state");
-}
-
-function shiftTask(event) {
-    if (!document.querySelector(".task-block_move-state")) return;
-
-   // document.querySelector(".task-block_move-state")
+    let movedBlock = event.target.closest(".task-block");
+    let pointerSeparator = document.createElement('div');
+    let taskList = document.querySelector('.task-list');
+    pointerSeparator.classList.add('task-list__pointer-separator');
     
-    event.preventDefault();
-}
-
-function putTask(){
-    if (!document.querySelector(".task-block_move-state")) return;
+    takeTask();
     
-    document.querySelector(".task-block_move-state")
-        .classList.remove("task-block_move-state");
+    let shiftX = event.clientX - movedBlock.getBoundingClientRect().left;
+    let shiftY = event.clientY - movedBlock.getBoundingClientRect().top;
+
+    document.addEventListener('pointermove', shiftTask);
+    document.addEventListener('pointerup', putTask);
+    document.addEventListener('pointercancel', putTask)
+    
+    function takeTask() {
+        movedBlock.before(pointerSeparator);
+        movedBlock.classList.add("task-block_move-state");
+    }
+
+    function shiftTask(event) {
+        event.preventDefault();
+        
+        movedBlock.style.top = event.clientY - shiftY + 'px';
+        movedBlock.style.left = event.clientX - shiftX + 'px';
+        
+        if (getCord(pointerSeparator, 'top') - getCord(movedBlock, 'top') >= getCord(movedBlock, 'height') / 2 ){
+            if (pointerSeparator !== taskList.firstElementChild) {
+                taskList.insertBefore(pointerSeparator, pointerSeparator.previousElementSibling);
+            }
+        }
+        
+        if (getCord(movedBlock, 'top') - getCord(pointerSeparator, 'top') >= getCord(movedBlock, 'height') / 2 ){
+            if (pointerSeparator !== taskList.lastElementChild) {
+                taskList.insertBefore(pointerSeparator, pointerSeparator.nextElementSibling.nextElementSibling);
+            }
+        }
+        
+        function getCord(elem, cord){
+            return elem.getBoundingClientRect()[cord];
+        }
+    }
+
+    function putTask() {
+        if(!document.querySelector(".task-block_move-state")) return;
+        
+        document.removeEventListener("pointermove", shiftTask);
+        document.removeEventListener("pointerup", putTask);
+        document.removeEventListener("pointercancel", putTask);
+        
+        movedBlock.classList.remove("task-block_move-state");
+        pointerSeparator.replaceWith(movedBlock);
+        movedBlock.style.removeProperty("top");
+        movedBlock.style.removeProperty("left");
+    }
 }
