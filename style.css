@@ -1,3 +1,12 @@
+*{
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                              supported by Chrome and Opera */
+}
+
 .body{
     display: flex;
     height: 100vh;
@@ -6,6 +15,7 @@
     font-family: Roboto, sans-serif;
     margin: 0 auto;
 }
+
 .add-task{
     display: flex;
     width: 100%;
@@ -15,6 +25,7 @@
     margin: 10px 0;
     padding: 10px 0;
 }
+
 .add-task__button{
     background-color: #3a88fe;
     border: none;
@@ -23,6 +34,7 @@
     width: 35px;
     margin: 0 10px;
 }
+
 .add-task__input{
     flex-grow: 1;
     height: 30px;
@@ -30,14 +42,17 @@
     margin-left: 10px;
     font-size: 16px;
 }
+
 .add-task__input:focus{
     outline: none;
 }
+
 .task-list{
     max-height: 350px;
-    overflow: scroll;
+    overflow: auto;
     width: 100%;
 }
+
 .task-block{
     display: flex;
     min-height: 50px;
@@ -46,6 +61,7 @@
     background-color: white;
     border-radius: 5px;
 }
+
 .task-block__mover{
     display: flex;
     align-items: center;
@@ -53,32 +69,48 @@
     padding: 0 17px;
     border-right: 1px solid #ebebeb;
 }
+
 .task-block_button-style{
     background-color: transparent;
     border: none;
     cursor: pointer;
     padding: 0 15px;
 }
+
 .task-block__check-button{
     border-right: 1px solid #ebebeb;
     border-left: 1px solid #ebebeb;
 }
+
 .task-block__del-button{
     padding: 0 16px;
 }
-.task-block__task{
+
+.task-block__task-container{
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.task-container__task{
     display: flex;
     align-items: center;
     cursor: pointer;
-    padding: 0 10px;
-    flex-grow: 1;
     word-wrap: anywhere;
+    flex-grow: 1;
+    padding: 0 10px;
 }
+
+.task-container__task:focus{
+    outline: none;
+}
+
 .task-list__pointer-separator{
     width: 70%;
     margin: 0 auto;
     border: 2px solid #3a88fe;
 }
+
 .task-block_move-state{
     position: absolute;
     border: 1px solid #3a88fe;
@@ -86,10 +118,12 @@
     width: 230px;
     overflow: hidden;
 }
+
 .task-done{
     background-color: #cce8b5;
     color: #606060;
 }
+
 .footer{
     border-top: 1px solid #ebebeb;
     width: 100px;
@@ -101,6 +135,7 @@
         width: 100%;
     }
 }
+
 @media (min-width: 431px) {
     .body{
         width: 430px;

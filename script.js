@@ -1,12 +1,14 @@
 let input = document.querySelector(".add-task__input");
 
 document.querySelector(".add-task__button").addEventListener('click', addTask);
-document.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', (event) => {
     if (document.activeElement === input && event.code === 'Enter') addTask();
+    if (event.code === "Escape") event.preventDefault();
 });
 document.addEventListener("click", removeTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
+document.addEventListener('dblclick', modifyTask)
 
 function createTask() {
     document.querySelector(".task-list")
@@ -15,9 +17,9 @@ function createTask() {
             , `<div class="task-block">
                 <div class="task-block__mover">
                     <i class="fa-solid fa-arrows-up-down fa-lg" style="color: #ebebeb;"></i>
-                  </div>
-                <div class="task-block__task">
-                    ${input.value}
+                </div>
+                <div class="task-block__task-container">
+                    <div class="task-container__task">${input.value}</div>
                 </div>
                 <button class="task-block__check-button task-block_button-style" type="button">
                     <div class="check-button_unchecked">
@@ -52,17 +54,18 @@ function removeTask(event){
 }
 
 function noticeTaskDone(event) {
-    let but = event.target.closest(".task-block__check-button");
-    if (!but) return;
+    let checkButton = event.target.closest(".task-block__check-button");
+    if (!checkButton) return;
     
     let block = event.target.closest(".task-block");
     
     block.classList.toggle('task-done');
-    [but.children[0].hidden, but.children[1].hidden] = [but.children[1].hidden, but.children[0].hidden]
+    [checkButton.children[0].hidden, checkButton.children[1].hidden] = 
+        [checkButton.children[1].hidden, checkButton.children[0].hidden];
     
-    let color = but.children[0].hidden ? '#ffffff' : "#ebebeb";
+    let color = checkButton.children[0].hidden ? '#ffffff' : "#ebebeb";
     
-    but.style.borderColor = color;
+    checkButton.style.borderColor = color;
     block.querySelector(".task-block__mover").style.borderColor = color;
     block.querySelector(".fa-trash").style.color = color;
     block.querySelector(".fa-arrows-up-down").style.color = color;
@@ -76,10 +79,9 @@ function moveTask(event) {
     let taskList = document.querySelector('.task-list');
     let pointerSeparator = document.createElement('div');
         pointerSeparator.classList.add('task-list__pointer-separator');
-
     let shiftX = event.clientX - getCord(movedBlock, 'left');
     let onScrollInterval;
-
+    
     takeTask();
 
     document.addEventListener('pointermove', shiftTask);
@@ -97,17 +99,13 @@ function moveTask(event) {
     function moveTo(oX, oY) {
         let left = oX - shiftX;
         let top = oY - movedBlock.offsetHeight / 2;
+
         //Restriction of leaving the screen
-        if (left < 0) left = 0;
-        if (left > document.documentElement.clientWidth - movedBlock.offsetWidth) {
-            left = document.documentElement.clientWidth - movedBlock.offsetWidth;
-        }
-        
-        if (top < 0) top = 0;
-        if (top > document.documentElement.clientHeight - movedBlock.offsetHeight) {
-            top = document.documentElement.clientHeight - movedBlock.offsetHeight;
-        }
-        
+        left = Math.max(left, 0);
+        left = Math.min(left, document.documentElement.clientWidth - movedBlock.offsetWidth);
+        top = Math.max(top, 0);
+        top = Math.min(top, document.documentElement.clientHeight - movedBlock.offsetHeight);
+
         movedBlock.style.top = top + 'px';
         movedBlock.style.left = left + 'px';
     }
@@ -170,10 +168,60 @@ function moveTask(event) {
         document.removeEventListener('contextmenu', putTask);
         
         clearInterval(onScrollInterval);
-        
         movedBlock.classList.remove("task-block_move-state");
         pointerSeparator.replaceWith(movedBlock);
         movedBlock.style.removeProperty("top");
         movedBlock.style.removeProperty("left");
+        taskList.scrollTop += Math.max(0, getCord(movedBlock, 'bottom') - getCord(taskList, "bottom"));
     }
+}
+
+function modifyTask(event) {
+    let taskField = event.target.closest(".task-container__task");
+    
+    if (!taskField) return;
+    if (taskField.getAttribute("contentEditable")) return;
+    
+    let valueBefore = taskField.textContent;
+    let okButton = document.createElement('button');
+    
+    okButton.innerHTML = `<i class="fa-solid fa-check fa-2xl" style="color: #00dd38;"></i>`;
+    okButton.classList.add("task-block_button-style");
+    
+    taskField.contentEditable = true;
+    taskField.after(okButton);
+    taskField.focus();
+    document.getSelection().setBaseAndExtent(taskField, 0, taskField, taskField.childNodes.length);
+    taskField.parentElement.style.border = "2px solid #3a88fe";
+    
+    document.addEventListener('click', cancelEditing);
+    document.addEventListener('keydown', cancelEditing);
+    document.addEventListener('keydown', applyEditing);
+    okButton.addEventListener('click', applyEditing);
+    
+    function cancelEditing(event){
+        if (!event.code && 
+            event.target.closest(".task-block__task-container") === taskField.parentElement) return;
+        if (event.code && event.code !== "Escape") return;
+        
+        finishEditing(true)
+    }
+    
+    function applyEditing(event){
+        if (event.code && event.code !== "Enter") return;
+        finishEditing();
+    }
+    
+    function finishEditing(cancel = false){
+        if (cancel) taskField.textContent = valueBefore;
+        taskField.removeAttribute('contentEditable');
+        okButton.remove();
+        taskField.parentElement.style.removeProperty('border');
+
+        document.removeEventListener('click', cancelEditing);
+        document.removeEventListener('keydown', cancelEditing);
+        document.removeEventListener('keydown', applyEditing);
+        okButton.removeEventListener('click', applyEditing);
+    }
+    
 }
