@@ -1,4 +1,5 @@
 let input = document.querySelector(".add-task__input");
+let taskList = document.querySelector('.task-list');
 
 document.querySelector(".add-task__button").addEventListener('click', addTask);
 document.addEventListener('keydown', (event) => {
@@ -8,42 +9,27 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener("click", removeTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
-document.addEventListener('dblclick', modifyTask)
+document.addEventListener('dblclick', modifyTask);
+window.addEventListener('load', fillTaskList);
+window.addEventListener('unload', saveTaskList);
 
-function createTask() {
-    document.querySelector(".task-list")
-        .insertAdjacentHTML(
-            "beforeend"
-            , `<div class="task-block">
-                <div class="task-block__mover">
-                    <i class="fa-solid fa-arrows-up-down fa-lg" style="color: #ebebeb;"></i>
-                </div>
-                <div class="task-block__task-container">
-                    <div class="task-container__task">${input.value}</div>
-                </div>
-                <button class="task-block__check-button task-block_button-style" type="button">
-                    <div class="check-button_unchecked">
-                        <i class="fa-solid fa-square-check fa-xl" style="color: #ebebeb;"></i>
-                    </div>
-                    <div class="check-button_checked" hidden>
-                        <i class="fa-solid fa-check fa-xl" style="color: #00dd38;"></i>
-                    </div>
-                </button>
-                <button class="task-block__del-button task-block_button-style" type="button">
-                    <i class="fa-solid fa-trash fa-lg" style="color: #ebebeb;"></i>
-                </button>
-            </div>
-    `   );
+function createTask(value) {
+    let block = document.querySelector(".task-list__block-template").content.cloneNode(true);
+    block.querySelector(".task-container__task").textContent = value;
+    taskList.append(block);
+    
 }
 
 function addTask() {
     if (!input.value.length) {
         alert("Add new task!");
+    } else if (Array.from(document.querySelectorAll(".task-container__task"))
+        .map(elem => elem.textContent).includes(input.value)) {
+        alert("You already have this task!");
+    } else {
+        createTask(input.value);
     }
-    else {
-        createTask();
-        input.value = '';
-    }
+    input.value = '';
     input.focus();
 }
 
@@ -76,7 +62,6 @@ function moveTask(event) {
     if (document.querySelectorAll(".task-block").length < 2) return;
 
     let movedBlock = event.target.closest(".task-block");
-    let taskList = document.querySelector('.task-list');
     let pointerSeparator = document.createElement('div');
         pointerSeparator.classList.add('task-list__pointer-separator');
     let shiftX = event.clientX - getCord(movedBlock, 'left');
@@ -224,4 +209,24 @@ function modifyTask(event) {
         okButton.removeEventListener('click', applyEditing);
     }
     
+}
+
+function fillTaskList() {
+    for (let i = 0; i < localStorage.length; i++) {
+        let objectBlock = JSON.parse(localStorage.getItem(i));
+        createTask(objectBlock.value);
+        if (objectBlock.isDone){
+            taskList.lastElementChild.querySelector(".task-block__check-button").click();
+        }
+    }
+}
+
+function saveTaskList() {
+    localStorage.clear();
+    for (let i = 0; i < taskList.children.length; i++) {
+        localStorage.setItem(i, JSON.stringify({
+            value: taskList.children[i].querySelector(".task-container__task").textContent,
+            isDone: taskList.children[i].classList.contains('task-done')
+        }));
+    }
 }

@@ -16,10 +16,32 @@
             <i class="fa-solid fa-plus fa-xl" style="color: #ffffff;"></i>
         </button>
     </form>
-    <div class="task-list"></div>
+    <div class="task-list">
+    </div>
     <footer class="footer">
         <div class></div>
     </footer>
+    <template class="task-list__block-template">
+        <div class="task-block">
+            <div class="task-block__mover">
+                <i class="fa-solid fa-arrows-up-down fa-lg" style="color: #ebebeb;"></i>
+            </div>
+            <div class="task-block__task-container">
+                <div class="task-container__task"></div>
+            </div>
+            <button class="task-block__check-button task-block_button-style" type="button">
+                    <span class="check-button_unchecked">
+                        <i class="fa-solid fa-square-check fa-xl" style="color: #ebebeb;"></i>
+                    </span>
+                <span class="check-button_checked" hidden>
+                        <i class="fa-solid fa-check fa-xl" style="color: #00dd38;"></i>
+                    </span>
+            </button>
+            <button class="task-block__del-button task-block_button-style" type="button">
+                <i class="fa-solid fa-trash fa-lg" style="color: #ebebeb;"></i>
+            </button>
+        </div>
+    </template>
 <script src="script.js"></script>
 </body>
 </html>
