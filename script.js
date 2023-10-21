@@ -1,31 +1,43 @@
 let input = document.querySelector(".add-task__input");
 let taskList = document.querySelector('.task-list');
+let alertTimeoutID;
+let basketCounter = 0;
+let basketObserver = new MutationObserver(activateBasket);
+
+basketObserver.observe(document.querySelector(".basket-form__basket"), {childList: true});
 
 document.querySelector(".add-task__button").addEventListener('click', addTask);
+document.querySelector(".footer__basket-button").addEventListener('click', toggleBasketVisibility);
+document.querySelector(".basket-form__close-button").addEventListener('click', toggleBasketVisibility);
+document.querySelector(".basket-buttons__restore-button").addEventListener('click', returnTask);
+document.querySelector(".basket-buttons__clean-button").addEventListener('click', removeTask);
+// document.querySelector(".basket-interface__all-checker").addEventListener('click', checkAllTasks);
+document.addEventListener('click', checkAllTasks);
+// document.querySelector(".footer__basket-button").addEventListener('contextmenu', showBasketMenu);
 document.addEventListener('keydown', (event) => {
     if (document.activeElement === input && event.code === 'Enter') addTask();
     if (event.code === "Escape") event.preventDefault();
 });
-document.addEventListener("click", removeTask);
+document.addEventListener("click", throwTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
+document.addEventListener('dragstart', event => event.preventDefault());
 document.addEventListener('dblclick', modifyTask);
 window.addEventListener('load', fillTaskList);
 window.addEventListener('unload', saveTaskList);
-
+ 
 function createTask(value) {
     let block = document.querySelector(".task-list__block-template").content.cloneNode(true);
     block.querySelector(".task-container__task").textContent = value;
     taskList.append(block);
-    
 }
 
 function addTask() {
     if (!input.value.length) {
-        alert("Add new task!");
+        createAlert("Add new task!", "error");
     } else if (Array.from(document.querySelectorAll(".task-container__task"))
         .map(elem => elem.textContent).includes(input.value)) {
-        alert("You already have this task!");
+        createAlert("You already have this task!", "error");
     } else {
         createTask(input.value);
     }
@@ -33,10 +45,18 @@ function addTask() {
     input.focus();
 }
 
-function removeTask(event){
+function throwTask(event){
     if (!event.target.closest('.task-block__del-button')) return;
-
+    
+    let basketElement= document.querySelector(".basket__template").content.cloneNode(true);
+    
+    basketElement.querySelector(".basket__label")
+        .append(event.target.closest(".task-block").querySelector(".task-container__task").textContent);
+    document.querySelector('.basket-form__basket').prepend(basketElement);
+    
     event.target.closest('.task-block').remove();
+    
+    input.focus()
 }
 
 function noticeTaskDone(event) {
@@ -55,6 +75,7 @@ function noticeTaskDone(event) {
     block.querySelector(".task-block__mover").style.borderColor = color;
     block.querySelector(".fa-trash").style.color = color;
     block.querySelector(".fa-arrows-up-down").style.color = color;
+    input.focus();
 }
 
 function moveTask(event) {
@@ -158,6 +179,7 @@ function moveTask(event) {
         movedBlock.style.removeProperty("top");
         movedBlock.style.removeProperty("left");
         taskList.scrollTop += Math.max(0, getCord(movedBlock, 'bottom') - getCord(taskList, "bottom"));
+        input.focus();
     }
 }
 
@@ -228,5 +250,72 @@ function saveTaskList() {
             value: taskList.children[i].querySelector(".task-container__task").textContent,
             isDone: taskList.children[i].classList.contains('task-done')
         }));
+    }
+}
+
+function createAlert(text, type) {
+    let alert = document.querySelector(".header__alert");
+    
+    if (alert.textContent === text) return;
+    if (alert.textContent) clearTimeout(alertTimeoutID);
+    
+    alert.classList.remove("error");
+    alert.textContent = text;
+    alert.classList.add(type);
+    
+    alertTimeoutID = setTimeout(() => {
+        alert.textContent = "";
+        alert.classList.remove(type);
+    }, 3000);
+}
+
+function toggleBasketVisibility() {
+    document.querySelector(".footer__basket-form").classList.toggle("hidden");
+}
+
+function activateBasket(mutations) {
+    basketCounter += getMutationLength(mutations, 'addedNodes') - 
+        getMutationLength(mutations, 'removedNodes');
+    
+    document.querySelector(".footer__basket-button").disabled = !basketCounter;
+    document.querySelector(".basket-button_inactive").classList.toggle("hidden", !!basketCounter);
+    document.querySelector(".basket-button_active").classList.toggle("hidden", !basketCounter);
+    document.querySelector(".basket-interface__all-checker").checked = false;
+    
+    function getMutationLength(mutations, parameter){
+       return mutations
+           .map(mutation => Array.from(mutation[parameter])
+               .map(elem => +(elem instanceof HTMLElement))
+               .reduce((a, b) => a + b, 0))
+           .reduce((a, b) => a + b, 0);
+    }
+}
+
+function removeTask(){
+    document.querySelectorAll(".basket__input:checked")
+        .forEach(elem => elem.closest(".basket__label").remove());
+    
+    document.querySelector(".basket-interface__all-checker").checked = false;
+    toggleBasketVisibility();
+    input.focus();
+}
+
+function returnTask() {
+    document.querySelectorAll(".basket__input:checked")
+        .forEach(elem => createTask(elem
+            .closest(".basket__label").lastChild.textContent));
+    
+    removeTask();
+}
+
+function checkAllTasks(event) {
+    if (event.target.classList.contains("basket-interface__all-checker")) {
+        document.querySelectorAll(".basket__input")
+            .forEach(input => input.checked = event.target.checked);
+    }
+    
+    if (event.target.classList.contains("basket__input")){
+       document.querySelector(".basket-interface__all-checker").checked = 
+           Array.from(document.querySelectorAll('.basket__input')).every(input => input.checked);
     }
 }

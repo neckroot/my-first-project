@@ -4,22 +4,51 @@
     <meta charset="UTF-8">
     <title>ToDo List</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/8ef757530e.js" crossorigin="anonymous"></script>
 </head>
 <body class="body">
     <header class="header">
+        <div class="header__alert"></div>
         <h1 class="header__caption">To Do List</h1>
     </header>
-    <form class="add-task" onsubmit="return false">
+    <div class="add-task">
         <input type="text" autofocus class="add-task__input" placeholder="Add new task:">
         <button class="add-task__button" type="button">
             <i class="fa-solid fa-plus fa-xl" style="color: #ffffff;"></i>
         </button>
-    </form>
-    <div class="task-list">
     </div>
+    <div class="task-list"></div>
     <footer class="footer">
-        <div class></div>
+        <button class="footer__basket-button task-block_button-style" disabled>
+            <span class="basket-button_inactive">
+                <i class="fa-solid fa-trash fa-2xl" style="color: #ebebeb;"></i>
+            </span>
+            <span class="basket-button_active hidden">
+                <i class="fa-solid fa-trash fa-2xl" style="color: #c40000;"></i>
+            </span>
+        </button>
+        <form class="footer__basket-form hidden">
+            <h1 class="basket-form__header">Basket</h1>
+            <div class="basket-form__basket"></div>
+            <div class="basket-form__basket-interface">
+                <label class="basket-interface__label">
+                    <input type="checkbox" class="basket-interface__all-checker">
+                    Check all
+                </label>
+                <div class="basket-interface__basket-buttons">
+                    <button type="button" class="basket-buttons__restore-button task-block_button-style">
+                        <i class="fa-solid fa-arrow-rotate-left fa-xl" style="color: #00dd38;"></i>
+                    </button>
+                    <button type="button" class="basket-buttons__clean-button task-block_button-style">
+                        <i class="fa-solid fa-trash fa-xl" style="color: #c40000;"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="basket-form__close-button">
+                <i class="fa-solid fa-xmark fa-2xl" style="color: #c40000;"></i>
+            </button>
+        </form>
     </footer>
     <template class="task-list__block-template">
         <div class="task-block">
@@ -38,10 +67,15 @@
                     </span>
             </button>
             <button class="task-block__del-button task-block_button-style" type="button">
-                <i class="fa-solid fa-trash fa-lg" style="color: #ebebeb;"></i>
+                <i class="fa-solid fa-trash fa-lg" style="color: #c40000;"></i>
             </button>
         </div>
     </template>
-<script src="script.js"></script>
+    <template class="basket__template">
+        <label class="basket__label">
+            <input type="checkbox" class="basket__input">
+        </label>
+    </template>
+    <script src="script.js"></script>
 </body>
 </html>

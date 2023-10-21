@@ -12,8 +12,33 @@
     height: 100vh;
     flex-direction: column;
     align-items: center;
-    font-family: Roboto, sans-serif;
+    font-family: Josefin Sans, sans-serif;
     margin: 0 auto;
+}
+
+.header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.header__alert{
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.error{
+    border: 2px solid #c40000;
+    color: #c40000;
 }
 
 .add-task{
@@ -41,6 +66,7 @@
     border: none;
     margin-left: 10px;
     font-size: 16px;
+    font-family: Josefin Sans, sans-serif;
 }
 
 .add-task__input:focus{
@@ -125,9 +151,34 @@
 }
 
 .footer{
+    display: flex;
+    flex-direction: column;
     border-top: 1px solid #ebebeb;
-    width: 100px;
+    width: 100%;
     margin: 10px 0;
+}
+
+.footer__basket-form{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 2px solid #ebebeb;
+    border-radius: 5px;
+}
+
+.basket-form__basket-interface{
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.basket-form__basket{
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden{
+    display: none;
 }
 
 @media only screen and (orientation: portrait) and (max-width: 430px) {
