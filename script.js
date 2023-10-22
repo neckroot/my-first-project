@@ -1,3 +1,5 @@
+'use strict';
+
 let input = document.querySelector(".add-task__input");
 let taskList = document.querySelector('.task-list');
 let alertTimeoutID;
@@ -11,9 +13,8 @@ document.querySelector(".footer__basket-button").addEventListener('click', toggl
 document.querySelector(".basket-form__close-button").addEventListener('click', toggleBasketVisibility);
 document.querySelector(".basket-buttons__restore-button").addEventListener('click', returnTask);
 document.querySelector(".basket-buttons__clean-button").addEventListener('click', removeTask);
-// document.querySelector(".basket-interface__all-checker").addEventListener('click', checkAllTasks);
 document.addEventListener('click', checkAllTasks);
-// document.querySelector(".footer__basket-button").addEventListener('contextmenu', showBasketMenu);
+document.querySelector(".footer__basket-button").addEventListener('contextmenu', showBasketMenu);
 document.addEventListener('keydown', (event) => {
     if (document.activeElement === input && event.code === 'Enter') addTask();
     if (event.code === "Escape") event.preventDefault();
@@ -35,9 +36,8 @@ function createTask(value) {
 function addTask() {
     if (!input.value.length) {
         createAlert("Add new task!", "error");
-    } else if (Array.from(document.querySelectorAll(".task-container__task"))
-        .map(elem => elem.textContent).includes(input.value)) {
-        createAlert("You already have this task!", "error");
+    } else if (checkDuplicateTask(input.value).any){
+        alertDuplicateTask(input.value);
     } else {
         createTask(input.value);
     }
@@ -198,8 +198,10 @@ function modifyTask(event) {
     taskField.contentEditable = true;
     taskField.after(okButton);
     taskField.focus();
+    toggleModalWindow()
+    
     document.getSelection().setBaseAndExtent(taskField, 0, taskField, taskField.childNodes.length);
-    taskField.parentElement.style.border = "2px solid #3a88fe";
+    taskField.parentElement.classList.add('edited');
     
     document.addEventListener('click', cancelEditing);
     document.addEventListener('keydown', cancelEditing);
@@ -221,35 +223,67 @@ function modifyTask(event) {
     
     function finishEditing(cancel = false){
         if (cancel) taskField.textContent = valueBefore;
+        if (checkDuplicateTask(taskField.textContent).any){
+            alertDuplicateTask(taskField.textContent);
+            taskField.focus();
+            return;
+        }
+        
         taskField.removeAttribute('contentEditable');
         okButton.remove();
-        taskField.parentElement.style.removeProperty('border');
+        toggleModalWindow()
+        taskField.parentElement.classList.remove('edited');
 
         document.removeEventListener('click', cancelEditing);
         document.removeEventListener('keydown', cancelEditing);
         document.removeEventListener('keydown', applyEditing);
         okButton.removeEventListener('click', applyEditing);
+        input.focus();
     }
-    
 }
 
 function fillTaskList() {
-    for (let i = 0; i < localStorage.length; i++) {
-        let objectBlock = JSON.parse(localStorage.getItem(i));
-        createTask(objectBlock.value);
-        if (objectBlock.isDone){
-            taskList.lastElementChild.querySelector(".task-block__check-button").click();
+    if (!!localStorage.getItem('taskList')) {
+        for (let objectBlock of Object.values(JSON.parse(localStorage.getItem('taskList')))) {
+            createTask(objectBlock.value);
+            if (objectBlock.isDone) {
+                taskList.lastElementChild.querySelector(".task-block__check-button").click();
+            }
+        }
+    }
+    
+    if (!!localStorage.getItem('basket')) {
+        for(let value of Object.values(JSON.parse(localStorage.getItem('basket'))).reverse()){
+            createTask(value);
+            taskList.lastElementChild.querySelector(".task-block__del-button").click();
         }
     }
 }
 
 function saveTaskList() {
     localStorage.clear();
-    for (let i = 0; i < taskList.children.length; i++) {
-        localStorage.setItem(i, JSON.stringify({
-            value: taskList.children[i].querySelector(".task-container__task").textContent,
-            isDone: taskList.children[i].classList.contains('task-done')
-        }));
+    
+    if (!!taskList.children.length) {
+        localStorage.setItem('taskList', JSON.stringify(
+            Object.assign(...Array.from({length: taskList.children.length},
+                (_, i) => {
+                    return {
+                        [i]: {
+                            value: taskList.children[i].querySelector(".task-container__task").textContent,
+                            isDone: taskList.children[i++].classList.contains('task-done')
+                        }
+                    }
+                }))
+        ));
+    } 
+    
+    if (!!document.querySelector(".basket-form__basket").children.length) {
+        localStorage.setItem('basket', JSON.stringify(
+            Object.assign(...Array.from({length: document.querySelector(".basket-form__basket").children.length},
+                (_, i) => {
+                    return {[i]: document.querySelector(".basket-form__basket").children[i++].lastChild.textContent}
+                }))
+        ));
     }
 }
 
@@ -273,6 +307,10 @@ function toggleBasketVisibility() {
     document.querySelector(".footer__basket-form").classList.toggle("hidden");
 }
 
+function toggleModalWindow(){
+    document.querySelector(".modal-window").classList.toggle('hidden');
+}
+
 function activateBasket(mutations) {
     basketCounter += getMutationLength(mutations, 'addedNodes') - 
         getMutationLength(mutations, 'removedNodes');
@@ -284,10 +322,10 @@ function activateBasket(mutations) {
     
     function getMutationLength(mutations, parameter){
        return mutations
-           .map(mutation => Array.from(mutation[parameter])
-               .map(elem => +(elem instanceof HTMLElement))
-               .reduce((a, b) => a + b, 0))
-           .reduce((a, b) => a + b, 0);
+           .map(mutation => Array.from(mutation[parameter]))
+           .flat()
+           .filter(elem => elem instanceof HTMLElement)
+           .length;
     }
 }
 
@@ -296,8 +334,11 @@ function removeTask(){
         .forEach(elem => elem.closest(".basket__label").remove());
     
     document.querySelector(".basket-interface__all-checker").checked = false;
-    toggleBasketVisibility();
-    input.focus();
+    
+    if (!document.querySelector('.basket-form__basket').children.length) {
+        toggleBasketVisibility();
+        input.focus();
+    }
 }
 
 function returnTask() {
@@ -317,5 +358,55 @@ function checkAllTasks(event) {
     if (event.target.classList.contains("basket__input")){
        document.querySelector(".basket-interface__all-checker").checked = 
            Array.from(document.querySelectorAll('.basket__input')).every(input => input.checked);
+    }
+}
+
+function showBasketMenu(event) {
+    event.preventDefault();
+
+    toggleModalWindow()
+    document.querySelector(".footer__context-menu").classList.toggle("hidden");
+    document.querySelector(".list__item_restore").addEventListener("click", restoreTasks);
+    document.querySelector(".list__item_cleanup").addEventListener("click", cleanupBasket);
+    document.addEventListener("click", closeMenu);
+    
+    function restoreTasks() {
+        document.querySelector('.basket-interface__all-checker').click();
+        document.querySelector('.basket-buttons__restore-button').click();
+    }
+    function cleanupBasket() {
+        document.querySelector('.basket-interface__all-checker').click();
+        document.querySelector('.basket-buttons__clean-button').click();
+    }
+    
+    function closeMenu(event) {
+        if (event.target.closest('.footer__context-menu')) return;
+
+        toggleModalWindow()
+        document.querySelector(".footer__context-menu").classList.toggle("hidden");
+        toggleBasketVisibility();
+        document.querySelector(".list__item_restore").removeEventListener("click", restoreTasks);
+        document.querySelector(".list__item_cleanup").removeEventListener("click", cleanupBasket);
+        document.removeEventListener("click", closeMenu);
+        
+        input.focus();
+    }
+}
+
+function checkDuplicateTask(task) {
+    let pool = {};
+    pool.taskList = Array.from(document.querySelectorAll(".task-container__task:not([contentEditable])")
+        ,elem => elem.textContent).includes(task);
+    pool.basket = Array.from(document.querySelectorAll(".basket__label"),
+            elem => elem.lastChild.textContent).includes(task);
+    pool.any = pool.taskList || pool.basket;
+    return pool;
+}
+
+function alertDuplicateTask(task) {
+    if (checkDuplicateTask(task).taskList) {
+        createAlert("You already have this task!", "error");
+    } else if (checkDuplicateTask(task).basket) {
+        createAlert("You already have this task! Restore from basket.", "error");
     }
 }

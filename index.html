@@ -28,6 +28,12 @@
                 <i class="fa-solid fa-trash fa-2xl" style="color: #c40000;"></i>
             </span>
         </button>
+        <nav class="footer__context-menu hidden">
+            <ul class="context-menu__list">
+                <li class="list__item_restore">Restore</li>
+                <li class="list__item_cleanup">Cleanup</li>
+            </ul>
+        </nav>
         <form class="footer__basket-form hidden">
             <h1 class="basket-form__header">Basket</h1>
             <div class="basket-form__basket"></div>
@@ -50,6 +56,7 @@
             </button>
         </form>
     </footer>
+    <div class="modal-window hidden"></div>
     <template class="task-list__block-template">
         <div class="task-block">
             <div class="task-block__mover">
