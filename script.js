@@ -1,7 +1,7 @@
 'use strict';
 
 let input = document.querySelector(".add-task__input");
-let taskList = document.querySelector('.task-list');
+let taskList = document.querySelector('.main__task-list');
 let alertTimeoutID;
 let basketCounter = 0;
 let basketObserver = new MutationObserver(activateBasket);
@@ -13,12 +13,12 @@ document.querySelector(".footer__basket-button").addEventListener('click', toggl
 document.querySelector(".basket-form__close-button").addEventListener('click', toggleBasketVisibility);
 document.querySelector(".basket-buttons__restore-button").addEventListener('click', returnTask);
 document.querySelector(".basket-buttons__clean-button").addEventListener('click', removeTask);
-document.addEventListener('click', checkAllTasks);
 document.querySelector(".footer__basket-button").addEventListener('contextmenu', showBasketMenu);
 document.addEventListener('keydown', (event) => {
     if (document.activeElement === input && event.code === 'Enter') addTask();
     if (event.code === "Escape") event.preventDefault();
 });
+document.addEventListener('click', checkAllTasks);
 document.addEventListener("click", throwTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
@@ -73,7 +73,6 @@ function noticeTaskDone(event) {
     
     checkButton.style.borderColor = color;
     block.querySelector(".task-block__mover").style.borderColor = color;
-    block.querySelector(".fa-trash").style.color = color;
     block.querySelector(".fa-arrows-up-down").style.color = color;
     input.focus();
 }
@@ -304,7 +303,23 @@ function createAlert(text, type) {
 }
 
 function toggleBasketVisibility() {
+    document.querySelector(".footer__basket-form").style.minHeight = 
+        document.querySelector('.footer').getBoundingClientRect().bottom -
+        document.querySelector('.main').getBoundingClientRect().top +
+        'px';
+    
+    document.querySelector(".header__caption").textContent =
+        document.querySelector(".footer__basket-form").classList.contains("hidden") ?
+            "Basket" : "To Do List" ;
+    
     document.querySelector(".footer__basket-form").classList.toggle("hidden");
+    document.querySelector('.main').classList.toggle('hidden');
+    document.querySelector('.footer__basket-button').classList.toggle('hidden');
+    
+    document.querySelector('.basket-form__basket').scrollTop = 
+        document.querySelector('.basket-form__basket').scrollHeight -
+        document.querySelector('.basket-form__basket').offsetHeight;
+    
 }
 
 function toggleModalWindow(){
@@ -363,9 +378,16 @@ function checkAllTasks(event) {
 
 function showBasketMenu(event) {
     event.preventDefault();
-
+    
+    let menu = document.querySelector(".footer__context-menu");
+    
     toggleModalWindow()
-    document.querySelector(".footer__context-menu").classList.toggle("hidden");
+    menu.classList.toggle("hidden");
+
+    menu.style.top = event.clientY - menu.offsetHeight + 'px';
+    menu.style.left = (event.clientX > document.body.getBoundingClientRect().right - menu.offsetWidth ?
+    event.clientX - menu.offsetWidth : event.clientX) + 'px';
+    
     document.querySelector(".list__item_restore").addEventListener("click", restoreTasks);
     document.querySelector(".list__item_cleanup").addEventListener("click", cleanupBasket);
     document.addEventListener("click", closeMenu);
@@ -373,22 +395,24 @@ function showBasketMenu(event) {
     function restoreTasks() {
         document.querySelector('.basket-interface__all-checker').click();
         document.querySelector('.basket-buttons__restore-button').click();
+        toggleBasketVisibility()
     }
+    
     function cleanupBasket() {
         document.querySelector('.basket-interface__all-checker').click();
         document.querySelector('.basket-buttons__clean-button').click();
+        toggleBasketVisibility()
     }
     
     function closeMenu(event) {
         if (event.target.closest('.footer__context-menu')) return;
 
         toggleModalWindow()
-        document.querySelector(".footer__context-menu").classList.toggle("hidden");
-        toggleBasketVisibility();
+        menu.classList.toggle("hidden");
         document.querySelector(".list__item_restore").removeEventListener("click", restoreTasks);
         document.querySelector(".list__item_cleanup").removeEventListener("click", cleanupBasket);
         document.removeEventListener("click", closeMenu);
-        
+        menu.removeAttribute('style');
         input.focus();
     }
 }

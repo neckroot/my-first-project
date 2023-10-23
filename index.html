@@ -12,13 +12,15 @@
         <div class="header__alert"></div>
         <h1 class="header__caption">To Do List</h1>
     </header>
-    <div class="add-task">
-        <input type="text" autofocus class="add-task__input" placeholder="Add new task:">
-        <button class="add-task__button" type="button">
-            <i class="fa-solid fa-plus fa-xl" style="color: #ffffff;"></i>
-        </button>
-    </div>
-    <div class="task-list"></div>
+    <main class="main">
+        <div class="main__add-task">
+            <input type="text" autofocus class="add-task__input" placeholder="Add new task:">
+            <button class="add-task__button" type="button">
+                <i class="fa-solid fa-plus fa-xl" style="color: #ffffff;"></i>
+            </button>
+        </div>
+        <div class="main__task-list"></div>
+    </main>
     <footer class="footer">
         <button class="footer__basket-button task-block_button-style" disabled>
             <span class="basket-button_inactive">
@@ -30,12 +32,11 @@
         </button>
         <nav class="footer__context-menu hidden">
             <ul class="context-menu__list">
-                <li class="list__item_restore">Restore</li>
-                <li class="list__item_cleanup">Cleanup</li>
+                <li class="list__item_restore list__item_style">Restore</li>
+                <li class="list__item_cleanup list__item_style">Cleanup</li>
             </ul>
         </nav>
         <form class="footer__basket-form hidden">
-            <h1 class="basket-form__header">Basket</h1>
             <div class="basket-form__basket"></div>
             <div class="basket-form__basket-interface">
                 <label class="basket-interface__label">
@@ -51,7 +52,7 @@
                     </button>
                 </div>
             </div>
-            <button type="button" class="basket-form__close-button">
+            <button type="button" class="basket-form__close-button task-block_button-style">
                 <i class="fa-solid fa-xmark fa-2xl" style="color: #c40000;"></i>
             </button>
         </form>
