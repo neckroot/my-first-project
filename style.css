@@ -9,7 +9,7 @@
 }
 
 html{
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .body{
@@ -73,7 +73,7 @@ html{
     height: 30px;
     border: none;
     margin-left: 10px;
-    font-size: 16px;
+    font-size: 20px;
     font-family: Josefin Sans, sans-serif;
 }
 
@@ -163,6 +163,14 @@ html{
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    flex-shrink: 0;
+}
+
+.footer__basket-form{
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    background-color: white;
 }
 
 .footer__basket-button,
@@ -171,17 +179,12 @@ html{
     border-top: 1px solid;
     height: 55px;
     border-image: linear-gradient(to right, #ffffff, #ebebeb, #ffffff) 1;
-}
-
-.footer__basket-form{
-    display: flex;
-    box-sizing: border-box;
-    flex-direction: column;
-    background-color: white;
+    flex-shrink: 0;
 }
 
 .basket-form__basket{
     display: flex;
+    flex-grow: 1;
     overflow-y: auto;
     border-bottom: 2px solid;
     border-top: 2px solid;
@@ -232,7 +235,6 @@ html{
 
 .basket-form__basket{
     display: flex;
-    flex-grow: 1;
     flex-direction: column;
 }
 
