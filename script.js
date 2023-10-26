@@ -5,6 +5,7 @@ let taskList = document.querySelector('.main__task-list');
 let alertTimeoutID;
 let basketCounter = 0;
 let basketObserver = new MutationObserver(activateBasket);
+let clickCounter = 0; //for double click polyfill;
 
 basketObserver.observe(document.querySelector(".basket-form__basket"), {childList: true});
 
@@ -15,15 +16,15 @@ document.querySelector(".basket-buttons__restore-button").addEventListener('clic
 document.querySelector(".basket-buttons__clean-button").addEventListener('click', removeTask);
 document.querySelector(".footer__basket-button").addEventListener('contextmenu', showBasketMenu);
 document.addEventListener('keydown', (event) => {
-    if (document.activeElement === input && event.code === 'Enter') addTask();
-    if (event.code === "Escape") event.preventDefault();
+    if (document.activeElement === input && event.keyCode === 13) addTask(); //Enter
+    if (event.keyCode === 27) event.preventDefault(); //Escape
 });
 document.addEventListener('click', checkAllTasks);
 document.addEventListener("click", throwTask);
 document.addEventListener('click', noticeTaskDone);
 document.addEventListener('pointerdown', moveTask);
 document.addEventListener('dragstart', event => event.preventDefault());
-document.addEventListener('dblclick', modifyTask);
+document.addEventListener('click', modifyTask);
 window.addEventListener('load', fillTaskList);
 window.addEventListener('unload', saveTaskList);
  
@@ -55,8 +56,6 @@ function throwTask(event){
     document.querySelector('.basket-form__basket').prepend(basketElement);
     
     event.target.closest('.task-block').remove();
-    
-    input.focus()
 }
 
 function noticeTaskDone(event) {
@@ -74,7 +73,6 @@ function noticeTaskDone(event) {
     checkButton.style.borderColor = color;
     block.querySelector(".task-block__mover").style.borderColor = color;
     block.querySelector(".fa-arrows-up-down").style.color = color;
-    input.focus();
 }
 
 function moveTask(event) {
@@ -178,7 +176,6 @@ function moveTask(event) {
         movedBlock.style.removeProperty("top");
         movedBlock.style.removeProperty("left");
         taskList.scrollTop += Math.max(0, getCord(movedBlock, 'bottom') - getCord(taskList, "bottom"));
-        input.focus();
     }
 }
 
@@ -186,6 +183,11 @@ function modifyTask(event) {
     let taskField = event.target.closest(".task-container__task");
     
     if (!taskField) return;
+    
+    clickCounter ++;
+    setTimeout(() => clickCounter = 0, 500);
+    if (clickCounter < 2) return;
+    
     if (taskField.getAttribute("contentEditable")) return;
     
     let valueBefore = taskField.textContent;
@@ -208,15 +210,15 @@ function modifyTask(event) {
     okButton.addEventListener('click', applyEditing);
     
     function cancelEditing(event){
-        if (!event.code && 
+        if (!event.keyCode && 
             event.target.closest(".task-block__task-container") === taskField.parentElement) return;
-        if (event.code && event.code !== "Escape") return;
+        if (event.keyCode && event.keyCode !== 27) return;
         
         finishEditing(true)
     }
     
     function applyEditing(event){
-        if (event.code && event.code !== "Enter") return;
+        if (event.keyCode && event.keyCode !== 13) return;
         finishEditing();
     }
     
@@ -237,7 +239,6 @@ function modifyTask(event) {
         document.removeEventListener('keydown', cancelEditing);
         document.removeEventListener('keydown', applyEditing);
         okButton.removeEventListener('click', applyEditing);
-        input.focus();
     }
 }
 
@@ -303,7 +304,7 @@ function createAlert(text, type) {
 }
 
 function toggleBasketVisibility() {
-    document.querySelector(".footer__basket-form").style.minHeight = 
+    document.querySelector(".footer__basket-form").style.height = 
         document.querySelector('.footer').getBoundingClientRect().bottom -
         document.querySelector('.main').getBoundingClientRect().top +
         'px';
@@ -352,7 +353,6 @@ function removeTask(){
     
     if (!document.querySelector('.basket-form__basket').children.length) {
         toggleBasketVisibility();
-        input.focus();
     }
 }
 
@@ -413,7 +413,6 @@ function showBasketMenu(event) {
         document.querySelector(".list__item_cleanup").removeEventListener("click", cleanupBasket);
         document.removeEventListener("click", closeMenu);
         menu.removeAttribute('style');
-        input.focus();
     }
 }
 

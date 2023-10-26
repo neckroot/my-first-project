@@ -5,6 +5,11 @@
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none; /* Non-prefixed version, currently
                               supported by Chrome and Opera */
+    -webkit-tap-highlight-color: transparent;
+}
+
+html{
+    font-size: 16px;
 }
 
 .body{
@@ -19,7 +24,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
     margin-bottom: 30px;
 }
 
@@ -33,7 +37,6 @@
     align-items: center;
     background-color: white;
     font-weight: bold;
-    font-size: 16px;
 }
 
 .error{
@@ -44,7 +47,8 @@
 .main{
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 .main__add-task{
@@ -80,6 +84,7 @@
 .main__task-list{
     overflow-y: auto;
     margin: 20px 0;
+    flex-grow: 1;
 }
 
 .task-block{
@@ -96,6 +101,7 @@
     cursor: pointer;
     padding: 0 17px;
     border-right: 1px solid #ebebeb;
+    touch-action: none;
 }
 
 .task-block_button-style{
@@ -137,7 +143,7 @@
 .task-list__pointer-separator{
     width: 70%;
     margin: 0 auto;
-    border: 2px solid #3a88fe;
+    outline: 2px solid #3a88fe;
 }
 
 .task-block_move-state{
@@ -163,9 +169,7 @@
 .basket-form__close-button{
     border-bottom: 1px solid;
     border-top: 1px solid;
-    box-sizing: content-box;
-    height: 35px;
-    padding: 10px;
+    height: 55px;
     border-image: linear-gradient(to right, #ffffff, #ebebeb, #ffffff) 1;
 }
 
@@ -178,7 +182,7 @@
 
 .basket-form__basket{
     display: flex;
-    overflow: auto;
+    overflow-y: auto;
     border-bottom: 2px solid;
     border-top: 2px solid;
     border-image: linear-gradient(to right, #ffffff 20%, #3a88fe, #ffffff 80%) 1;
@@ -283,20 +287,19 @@
     left: 0;
 }
 
-@media only screen and (orientation: portrait) and (max-width: 430px) {
-    .body,
-    .footer__basket-form{
+@media (max-width: 576px) {
+    .body{
         width: 100%;
     }
 }
 
-@media (min-width: 431px) {
+@media (min-width: 577px) {
     .body{
-        width: 430px;
+        width: 577px;
         justify-content: center;
     }
-
-    .footer__basket-form{
-        width: 430px;
+    .main{
+        max-height: 70%;
     }
+
 }
